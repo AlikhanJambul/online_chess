@@ -7,10 +7,18 @@ import Game from './pages/Game'
 import Leaderboard from './pages/Leaderboard'
 import Profile from './pages/Profile'
 import Login from './pages/Login'
+import { useThemeStore } from './store/themeStore'
 
 
 function App() {
     useAuth()
+
+    const { isDark } = useThemeStore()
+
+    useEffect(() => {
+        document.documentElement.classList.toggle('dark', isDark)
+    }, [isDark])
+
 
     const { user, loading } = useAuthStore()
 
@@ -24,6 +32,7 @@ function App() {
                 <Route path="/game/:id" element={user ? <Game /> : <Navigate to="/login" />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
+                {/* <Route path="/game/:id" element={user ? <Game /> : <Navigate to="/login" />} /> */}
             </Routes>
         </BrowserRouter>
     )

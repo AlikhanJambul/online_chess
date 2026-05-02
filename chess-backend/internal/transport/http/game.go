@@ -1,8 +1,10 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
+	"log/slog"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (h *Handler) CreateGame(c *gin.Context) {
@@ -10,6 +12,7 @@ func (h *Handler) CreateGame(c *gin.Context) {
 
 	game, err := h.gameService.CreateGame(c.Request.Context(), uid)
 	if err != nil {
+		slog.Error(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -23,6 +26,8 @@ func (h *Handler) JoinGame(c *gin.Context) {
 
 	game, err := h.gameService.JoinGame(c.Request.Context(), gameID, uid)
 	if err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -35,10 +40,12 @@ func (h *Handler) FinishGame(c *gin.Context) {
 	gameID := c.Param("id")
 
 	var body struct {
-		WinnerID string `json:"winner_id" binding:"required"`
+		WinnerID string `json:"winner_id"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusBadRequest, gin.H{"error": "winner_id required"})
 		return
 	}
@@ -46,6 +53,8 @@ func (h *Handler) FinishGame(c *gin.Context) {
 	// только участник партии может завершить
 	game, err := h.gameService.GetGame(c.Request.Context(), gameID)
 	if err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusNotFound, gin.H{"error": "game not found"})
 		return
 	}
@@ -56,6 +65,8 @@ func (h *Handler) FinishGame(c *gin.Context) {
 	}
 
 	if err := h.gameService.FinishGame(c.Request.Context(), gameID, body.WinnerID); err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -68,6 +79,8 @@ func (h *Handler) GetGame(c *gin.Context) {
 
 	game, err := h.gameService.GetGame(c.Request.Context(), gameID)
 	if err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusNotFound, gin.H{"error": "game not found"})
 		return
 	}
@@ -80,6 +93,8 @@ func (h *Handler) GetUserGames(c *gin.Context) {
 
 	games, err := h.gameService.GetUserGames(c.Request.Context(), userID)
 	if err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -90,6 +105,8 @@ func (h *Handler) GetUserGames(c *gin.Context) {
 func (h *Handler) GetLeaderboard(c *gin.Context) {
 	entries, err := h.gameService.GetLeaderboard(c.Request.Context())
 	if err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

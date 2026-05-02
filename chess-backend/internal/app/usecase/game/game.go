@@ -38,12 +38,12 @@ func (s *gameService) JoinGame(ctx context.Context, gameID string, blackID strin
 		return nil, fmt.Errorf("game not found: %w", err)
 	}
 
-	if game.Status != "waiting" {
-		return nil, fmt.Errorf("game is not available to join")
-	}
-
 	if game.WhiteID == blackID {
 		return nil, fmt.Errorf("cannot join your own game")
+	}
+
+	if game.BlackID != nil {
+		return nil, fmt.Errorf("game is full")
 	}
 
 	if err := s.repo.JoinGame(ctx, gameID, blackID); err != nil {
@@ -60,10 +60,6 @@ func (s *gameService) FinishGame(ctx context.Context, gameID string, winnerID st
 	game, err := s.repo.GetGameByID(ctx, gameID)
 	if err != nil {
 		return fmt.Errorf("game not found: %w", err)
-	}
-
-	if game.Status != "active" {
-		return fmt.Errorf("game is not active")
 	}
 
 	// определяем loserID

@@ -1,11 +1,12 @@
 package ws
 
 import (
+	"log/slog"
+	"net/http"
+
 	"firebase.google.com/go/v4/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"log/slog"
-	"net/http"
 )
 
 var upgrader = websocket.Upgrader{
@@ -36,6 +37,8 @@ func (h *WSHandler) HandleConnection(c *gin.Context) {
 
 	decoded, err := h.authClient.VerifyIDToken(c.Request.Context(), token)
 	if err != nil {
+		slog.Error(err.Error())
+
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 		return
 	}
@@ -44,6 +47,8 @@ func (h *WSHandler) HandleConnection(c *gin.Context) {
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
+		slog.Error(err.Error())
+
 		slog.Error("ws upgrade error", "err", err)
 		return
 	}
