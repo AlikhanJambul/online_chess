@@ -18,8 +18,8 @@ type authService struct {
 	authClient *auth.Client
 }
 
-func NewService(repo ports.Repository) AuthService {
-	return &authService{repo: repo}
+func NewService(repo ports.Repository, authClient *auth.Client) AuthService {
+	return &authService{repo: repo, authClient: authClient}
 }
 
 func (s *authService) LoginOrCreate(ctx context.Context, uid string) (*models.User, error) {

@@ -12,6 +12,7 @@ type Config struct {
 	DBPassword              string
 	DBName                  string
 	FirebaseCredentialsPath string
+	Port                    string
 }
 
 func Load() *Config {
@@ -25,6 +26,7 @@ func Load() *Config {
 		DBName:                  getEnv("DB_NAME", "postgres"),
 		DBPassword:              getEnv("DB_PASSWORD", "postgres"),
 		FirebaseCredentialsPath: getEnv("FIREBASE_CREDENTIALS_PATH", "./serviceAccount.json"),
+		Port:                    getEnv("PORT", "8080"),
 	}
 }
 
