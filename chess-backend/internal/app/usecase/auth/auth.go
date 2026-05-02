@@ -1,4 +1,4 @@
-package usecase
+package auth
 
 import (
 	"chess-backend/internal/domain/models"
@@ -9,20 +9,20 @@ import (
 	"firebase.google.com/go/v4/auth"
 )
 
-type Service interface {
+type AuthService interface {
 	LoginOrCreate(ctx context.Context, uid string) (*models.User, error)
 }
 
-type service struct {
+type authService struct {
 	repo       ports.Repository
 	authClient *auth.Client
 }
 
-func NewService(repo ports.Repository) Service {
-	return &service{repo: repo}
+func NewService(repo ports.Repository) AuthService {
+	return &authService{repo: repo}
 }
 
-func (s *service) LoginOrCreate(ctx context.Context, uid string) (*models.User, error) {
+func (s *authService) LoginOrCreate(ctx context.Context, uid string) (*models.User, error) {
 	user, err := s.repo.GetByID(ctx, uid)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err

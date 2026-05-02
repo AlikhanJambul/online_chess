@@ -1,16 +1,16 @@
 package http
 
 import (
-	"chess-backend/internal/app/usecase"
+	"chess-backend/internal/app/usecase/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type Handler struct {
-	service usecase.Service
+	service auth.AuthService
 }
 
-func NewHandler(service usecase.Service) *Handler {
+func NewHandler(service auth.AuthService) *Handler {
 	return &Handler{service: service}
 }
 

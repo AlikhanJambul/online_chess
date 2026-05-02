@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Routes(r *gin.Engine, authClient *auth.Client) {
+func (h *Handler) Routes(r *gin.Engine, authClient *auth.Client) {
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
@@ -14,11 +14,11 @@ func Routes(r *gin.Engine, authClient *auth.Client) {
 	protected := r.Group("/api")
 	protected.Use(middleware.AuthMiddleware(authClient))
 	{
+		protected.POST("/login", h.Login)
+		//protected.POST("/games", h.CreateGame)
+		//protected.POST("/games/:id/finish", h.FinishGame)
+		//protected.GET("/games/:id", h.GetGame)
+		//protected.GET("/users/:id/games", h.GetUserGames)
+		//protected.GET("/leaderboard", h.GetLeaderboard)
 	}
-}
-
-func Route(r *gin.Engine) {
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "pong"})
-	})
 }
