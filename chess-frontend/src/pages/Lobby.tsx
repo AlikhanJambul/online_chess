@@ -14,9 +14,8 @@ export default function Lobby() {
     const card = isDark ? 'bg-zinc-800' : 'bg-white'
     const btn = isDark ? 'bg-zinc-700 hover:bg-zinc-600 text-white' : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-900'
 
-    const handlePlayBot = async () => {
-        const res = await api.post('/games')
-        navigate(`/game/${res.data.id}?mode=bot`)
+    const handlePlayBot = () => {
+        navigate('/game/bot?mode=bot')
     }
 
     const handleCreateOnline = async () => {

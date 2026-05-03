@@ -32,18 +32,18 @@ export default function Game() {
     const [copied, setCopied] = useState(false)
 
     const playerColorRef = useRef(playerColor)
-    useEffect(() => { playerColorRef.current = playerColor }, [playerColor])
-
+    const gameOverRef = useRef(false)
     const joinedRef = useRef(false)
+
+    useEffect(() => { playerColorRef.current = playerColor }, [playerColor])
 
     const bg = isDark ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-900'
     const card = isDark ? 'bg-zinc-800' : 'bg-white'
 
-    const gameOverRef = useRef(false)
-
     const handleGameOver = useCallback(async (chess: Chess, color: 'white' | 'black') => {
         if (!chess.isGameOver()) return
         if (gameOverRef.current) return
+        gameOverRef.current = true
         setGameOver(true)
 
         if (chess.isCheckmate()) {
@@ -54,12 +54,14 @@ export default function Game() {
                 setStatus('Вы проиграли! 😔')
             } else {
                 setStatus('Вы выиграли! 🎉')
-                await api.post(`/games/${id}/finish`, { winner_id: user?.uid })
+                if (mode !== 'bot') {
+                    await api.post(`/games/${id}/finish`, { winner_id: user?.uid })
+                }
             }
         } else {
             setStatus('Ничья! 🤝')
         }
-    }, [id, user])
+    }, [id, user, mode])
 
     const handleBestMove = useCallback((moveStr: string) => {
         const from = moveStr.slice(0, 2)
@@ -175,14 +177,12 @@ export default function Game() {
     const handleResign = async () => {
         if (mode !== 'bot') {
             sendMessage({ type: 'resign' })
+            const gameData = await api.get(`/games/${id}`)
+            const winnerId = gameData.data.white_id === user?.uid
+                ? gameData.data.black_id
+                : gameData.data.white_id
+            await api.post(`/games/${id}/finish`, { winner_id: winnerId })
         }
-
-        const gameData = await api.get(`/games/${id}`)
-        const winnerId = gameData.data.white_id === user?.uid 
-        ? gameData.data.black_id 
-        : gameData.data.white_id
-
-        await api.post(`/games/${id}/finish`, { winner_id: winnerId })
         setGameOver(true)
         setStatus('Вы сдались')
     }
