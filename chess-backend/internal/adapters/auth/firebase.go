@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
-	"firebase.google.com/go/v4/auth"
 	"fmt"
+	"os"
+
+	"firebase.google.com/go/v4/auth"
 
 	firebase "firebase.google.com/go/v4"
 
@@ -13,16 +15,19 @@ import (
 func ConnFireBase(credentialsPath string) (*auth.Client, error) {
 	ctx := context.Background()
 
-	opt := option.WithCredentialsFile(credentialsPath)
+	var opt option.ClientOption
+
+	if credsJSON := os.Getenv("FIREBASE_CREDENTIALS_JSON"); credsJSON != "" {
+		opt = option.WithCredentialsJSON([]byte(credsJSON))
+	} else {
+		// локально читаем из файла
+		opt = option.WithCredentialsFile(credentialsPath)
+	}
+
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing app: %v", err)
 	}
 
-	authClient, err := app.Auth(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return authClient, nil
+	return app.Auth(ctx)
 }
