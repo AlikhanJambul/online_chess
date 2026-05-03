@@ -14,13 +14,9 @@ interface LeaderboardEntry {
 
 export default function Leaderboard() {
     const navigate = useNavigate()
-    const { isDark } = useThemeStore()
+    const { isDark, toggle } = useThemeStore()
     const [entries, setEntries] = useState<LeaderboardEntry[]>([])
     const [loading, setLoading] = useState(true)
-
-    const bg = isDark ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-900'
-    const card = isDark ? 'bg-zinc-800' : 'bg-white'
-    const row = isDark ? 'border-zinc-700' : 'border-zinc-200'
 
     useEffect(() => {
         api.get('/leaderboard')
@@ -28,49 +24,77 @@ export default function Leaderboard() {
             .finally(() => setLoading(false))
     }, [])
 
+    const medals = ['🥇', '🥈', '🥉']
+
     return (
-        <div className={`min-h-screen flex flex-col items-center justify-center p-4 ${bg}`}>
-            <div className={`w-full max-w-lg rounded-2xl shadow-xl p-6 flex flex-col gap-4 ${card}`}>
-                <div className="flex items-center justify-between">
+        <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+            <header className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/')}
-                        className="text-sm text-zinc-500 hover:text-zinc-300 transition"
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition hover:opacity-70"
+                        style={{ background: 'var(--bg2)' }}
                     >
-                        ← Назад
+                        ←
                     </button>
-                    <h1 className="text-xl font-bold">🏆 Лидерборд</h1>
-                    <div className="w-12" />
+                    <h1 className="font-bold text-lg" style={{ color: 'var(--text)' }}>🏆 Лидерборд</h1>
                 </div>
+                <button
+                    onClick={toggle}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-lg transition hover:opacity-70"
+                    style={{ background: 'var(--bg2)' }}
+                >
+                    {isDark ? '☀️' : '🌙'}
+                </button>
+            </header>
 
+            <main className="flex-1 p-4 sm:p-8 max-w-2xl mx-auto w-full">
                 {loading ? (
-                    <p className="text-center text-zinc-500">Загрузка...</p>
+                    <div className="flex items-center justify-center h-40">
+                        <p style={{ color: 'var(--text2)' }}>Загрузка...</p>
+                    </div>
                 ) : entries.length === 0 ? (
-                    <p className="text-center text-zinc-500">Пока никого нет</p>
+                    <div className="flex flex-col items-center justify-center h-40 gap-2">
+                        <span className="text-4xl">🏆</span>
+                        <p style={{ color: 'var(--text2)' }}>Пока никого нет</p>
+                    </div>
                 ) : (
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className={`border-b ${row} text-zinc-500`}>
-                                <th className="py-2 text-left">#</th>
-                                <th className="py-2 text-left">Игрок</th>
-                                <th className="py-2 text-center">Победы</th>
-                                <th className="py-2 text-center">Поражения</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {entries.map((entry, i) => (
-                                <tr key={entry.id} className={`border-b ${row}`}>
-                                    <td className="py-3 text-zinc-500">
-                                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : entry.rank}
-                                    </td>
-                                    <td className="py-3 font-medium">{entry.name}</td>
-                                    <td className="py-3 text-center text-green-500 font-medium">{entry.wins}</td>
-                                    <td className="py-3 text-center text-red-500 font-medium">{entry.losses}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className="flex flex-col gap-2">
+                        {entries.map((entry, i) => (
+                            <div
+                                key={entry.id}
+                                className="flex items-center gap-4 p-4 rounded-2xl transition"
+                                style={{
+                                    background: i === 0 ? 'linear-gradient(135deg, #ffd700 0%, #ffb800 100%)' :
+                                               i === 1 ? 'linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%)' :
+                                               i === 2 ? 'linear-gradient(135deg, #cd7f32 0%, #b06020 100%)' :
+                                               'var(--card)',
+                                    border: '1px solid var(--border)',
+                                    color: i < 3 ? '#1a1a1a' : 'var(--text)'
+                                }}
+                            >
+                                <div className="w-10 text-center text-xl font-bold flex-shrink-0">
+                                    {i < 3 ? medals[i] : <span style={{ color: 'var(--text2)' }}>{i + 1}</span>}
+                                </div>
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0"
+                                    style={{ background: i < 3 ? 'rgba(0,0,0,0.15)' : 'var(--bg2)' }}>
+                                    {entry.avatar_url
+                                        ? <img src={entry.avatar_url} className="w-10 h-10 rounded-full" />
+                                        : '👤'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold truncate">{entry.name}</p>
+                                    <p className="text-sm opacity-70">{entry.wins}П / {entry.losses}П</p>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <p className="font-bold text-lg">{entry.wins}</p>
+                                    <p className="text-xs opacity-70">побед</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
-            </div>
+            </main>
         </div>
     )
 }

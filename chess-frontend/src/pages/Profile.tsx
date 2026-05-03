@@ -16,13 +16,9 @@ interface Game {
 export default function Profile() {
     const navigate = useNavigate()
     const { user } = useAuthStore()
-    const { isDark } = useThemeStore()
+    const { isDark, toggle } = useThemeStore()
     const [games, setGames] = useState<Game[]>([])
     const [loading, setLoading] = useState(true)
-
-    const bg = isDark ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-900'
-    const card = isDark ? 'bg-zinc-800' : 'bg-white'
-    const row = isDark ? 'border-zinc-700' : 'border-zinc-200'
 
     useEffect(() => {
         if (!user) return
@@ -31,74 +27,111 @@ export default function Profile() {
             .finally(() => setLoading(false))
     }, [user])
 
+    const wins = games.filter(g => g.winner_id === user?.uid).length
+    const losses = games.filter(g => g.status === 'finished' && g.winner_id && g.winner_id !== user?.uid).length
+
     const getResult = (game: Game) => {
-        if (game.status !== 'finished') return { label: 'В процессе', color: 'text-zinc-500' }
-        if (!game.winner_id) return { label: 'Ничья 🤝', color: 'text-zinc-400' }
+        if (game.status !== 'finished') return { label: 'В процессе', color: 'var(--text2)', bg: 'var(--bg2)' }
+        if (!game.winner_id) return { label: 'Ничья', color: '#8a8070', bg: 'var(--bg2)' }
         return game.winner_id === user?.uid
-            ? { label: 'Победа 🎉', color: 'text-green-500' }
-            : { label: 'Поражение 😔', color: 'text-red-500' }
+            ? { label: 'Победа', color: '#2d7a2d', bg: '#e8f5e8' }
+            : { label: 'Поражение', color: '#a33', bg: '#fde8e8' }
     }
 
     return (
-        <div className={`min-h-screen flex flex-col items-center justify-center p-4 ${bg}`}>
-            <div className={`w-full max-w-lg rounded-2xl shadow-xl p-6 flex flex-col gap-6 ${card}`}>
-                <div className="flex items-center justify-between">
+        <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+            <header className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/')}
-                        className="text-sm text-zinc-500 hover:text-zinc-300 transition"
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition hover:opacity-70"
+                        style={{ background: 'var(--bg2)' }}
                     >
-                        ← Назад
+                        ←
                     </button>
-                    <h1 className="text-xl font-bold">👤 Профиль</h1>
-                    <div className="w-12" />
+                    <h1 className="font-bold text-lg" style={{ color: 'var(--text)' }}>👤 Профиль</h1>
                 </div>
+                <button
+                    onClick={toggle}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-lg transition hover:opacity-70"
+                    style={{ background: 'var(--bg2)' }}
+                >
+                    {isDark ? '☀️' : '🌙'}
+                </button>
+            </header>
 
-                <div className="flex items-center gap-4">
-                    {user?.photoURL && (
-                        <img
-                            src={user.photoURL}
-                            className="w-14 h-14 rounded-full"
-                        />
-                    )}
-                    <div>
-                        <p className="font-semibold text-lg">{user?.displayName}</p>
-                        <p className={`text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>{user?.email}</p>
+            <main className="flex-1 p-4 sm:p-8 max-w-2xl mx-auto w-full flex flex-col gap-4">
+                {/* User card */}
+                <div className="rounded-3xl p-6 flex items-center gap-4 shadow-sm"
+                    style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                    {user?.photoURL
+                        ? <img src={user.photoURL} className="w-16 h-16 rounded-2xl flex-shrink-0" />
+                        : <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{ background: 'var(--bg2)' }}>👤</div>
+                    }
+                    <div className="flex-1 min-w-0">
+                        <p className="font-bold text-xl truncate" style={{ color: 'var(--text)' }}>{user?.displayName}</p>
+                        <p className="text-sm truncate" style={{ color: 'var(--text2)' }}>{user?.email}</p>
                     </div>
                 </div>
 
-                <div>
-                    <h2 className="font-semibold mb-3">История игр</h2>
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl p-4 text-center shadow-sm"
+                        style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                        <p className="text-3xl font-bold" style={{ color: '#4d9e4d' }}>{wins}</p>
+                        <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>Победы</p>
+                    </div>
+                    <div className="rounded-2xl p-4 text-center shadow-sm"
+                        style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                        <p className="text-3xl font-bold" style={{ color: '#c44' }}>{losses}</p>
+                        <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>Поражения</p>
+                    </div>
+                </div>
+
+                {/* History */}
+                <div className="rounded-3xl overflow-hidden shadow-sm"
+                    style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                    <div className="px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+                        <h2 className="font-semibold" style={{ color: 'var(--text)' }}>История игр</h2>
+                    </div>
+
                     {loading ? (
-                        <p className="text-zinc-500 text-sm">Загрузка...</p>
+                        <div className="p-8 text-center" style={{ color: 'var(--text2)' }}>Загрузка...</div>
                     ) : games.length === 0 ? (
-                        <p className="text-zinc-500 text-sm">Игр пока нет</p>
+                        <div className="p-8 text-center flex flex-col items-center gap-2">
+                            <span className="text-3xl">♟</span>
+                            <p style={{ color: 'var(--text2)' }}>Игр пока нет</p>
+                        </div>
                     ) : (
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className={`border-b ${row} text-zinc-500`}>
-                                    <th className="py-2 text-left">Дата</th>
-                                    <th className="py-2 text-right">Результат</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {games.map(game => {
-                                    const result = getResult(game)
-                                    return (
-                                        <tr key={game.id} className={`border-b ${row}`}>
-                                            <td className="py-3 text-zinc-500">
-                                                {new Date(game.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className={`py-3 text-right font-medium ${result.color}`}>
-                                                {result.label}
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
+                        <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+                            {games.map(game => {
+                                const result = getResult(game)
+                                return (
+                                    <div key={game.id} className="flex items-center justify-between px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xl">♟</span>
+                                            <div>
+                                                <p className="font-medium text-sm" style={{ color: 'var(--text)' }}>
+                                                    Онлайн партия
+                                                </p>
+                                                <p className="text-xs" style={{ color: 'var(--text2)' }}>
+                                                    {new Date(game.created_at).toLocaleDateString('ru-RU')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span
+                                            className="text-xs font-semibold px-3 py-1 rounded-full"
+                                            style={{ color: result.color, background: result.bg }}
+                                        >
+                                            {result.label}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                        </div>
                     )}
                 </div>
-            </div>
+            </main>
         </div>
     )
 }

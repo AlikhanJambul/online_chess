@@ -15,7 +15,7 @@ export default function Game() {
     const mode = searchParams.get('mode')
     const navigate = useNavigate()
     const { user } = useAuthStore()
-    const { isDark } = useThemeStore()
+    const { isDark, toggle } = useThemeStore()
 
     const [game, setGame] = useState(new Chess())
     const [fen, setFen] = useState(new Chess().fen())
@@ -36,9 +36,6 @@ export default function Game() {
     const joinedRef = useRef(false)
 
     useEffect(() => { playerColorRef.current = playerColor }, [playerColor])
-
-    const bg = isDark ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-900'
-    const card = isDark ? 'bg-zinc-800' : 'bg-white'
 
     const handleGameOver = useCallback(async (chess: Chess, color: 'white' | 'black') => {
         if (!chess.isGameOver()) return
@@ -130,10 +127,8 @@ export default function Game() {
         if (mode === 'join') {
             if (joinedRef.current) return
             joinedRef.current = true
-
             setPlayerColor('black')
             playerColorRef.current = 'black'
-
             api.post(`/games/${id}/join`)
                 .then(() => {
                     setGameStarted(true)
@@ -193,40 +188,68 @@ export default function Game() {
         setTimeout(() => setCopied(false), 2000)
     }
 
+    const statusColor = gameOver
+        ? status.includes('Выиграли') ? '#4d9e4d'
+        : status.includes('Проиграли') ? '#c44'
+        : 'var(--text2)'
+        : 'var(--text)'
+
     return (
-        <div className={`min-h-screen flex flex-col items-center justify-center gap-4 p-4 ${bg}`}>
-            <div className={`w-full max-w-lg rounded-2xl shadow-xl p-6 flex flex-col gap-4 ${card}`}>
-                <div className="flex items-center justify-between">
+        <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+            {/* Header */}
+            <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b flex-shrink-0"
+                style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/')}
-                        className="text-sm text-zinc-500 hover:text-zinc-300 transition"
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition hover:opacity-70"
+                        style={{ background: 'var(--bg2)' }}
                     >
-                        ← Лобби
+                        ←
                     </button>
-                    <span className={`text-sm px-3 py-1 rounded-full ${isDark ? 'bg-zinc-700' : 'bg-zinc-200'}`}>
+                    <span className="text-sm font-medium px-3 py-1 rounded-full"
+                        style={{ background: 'var(--bg2)', color: 'var(--text2)' }}>
                         {mode === 'bot' ? '🤖 Бот' : '🌐 Онлайн'}
                     </span>
                 </div>
+                <button
+                    onClick={toggle}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-lg transition hover:opacity-70"
+                    style={{ background: 'var(--bg2)' }}
+                >
+                    {isDark ? '☀️' : '🌙'}
+                </button>
+            </header>
 
-                <h2 className="text-xl font-semibold text-center">{status}</h2>
+            {/* Main */}
+            <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 gap-4">
+                {/* Status */}
+                <div className="text-center">
+                    <p className="text-lg font-semibold" style={{ color: statusColor }}>{status}</p>
+                </div>
 
+                {/* Invite link */}
                 {mode === 'online' && inviteLink && (
-                    <div className={`flex gap-2 p-3 rounded-xl ${isDark ? 'bg-zinc-700' : 'bg-zinc-100'}`}>
+                    <div className="w-full max-w-lg flex gap-2 p-3 rounded-2xl"
+                        style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
                         <input
                             value={inviteLink}
                             readOnly
                             className="flex-1 bg-transparent text-sm outline-none truncate"
+                            style={{ color: 'var(--text2)' }}
                         />
                         <button
                             onClick={handleCopy}
-                            className="text-sm px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition"
+                            className="text-sm px-3 py-1 rounded-xl text-white transition flex-shrink-0"
+                            style={{ background: copied ? '#4d9e4d' : '#4a7cc7' }}
                         >
-                            {copied ? '✓' : 'Копировать'}
+                            {copied ? '✓ Скопировано' : 'Копировать'}
                         </button>
                     </div>
                 )}
 
-                <div className="rounded-xl overflow-hidden">
+                {/* Board */}
+                <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-xl">
                     <Chessboard
                         options={{
                             position: fen,
@@ -236,24 +259,27 @@ export default function Game() {
                     />
                 </div>
 
-                {!gameOver && (
-                    <button
-                        onClick={handleResign}
-                        className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium transition"
-                    >
-                        🏳️ Сдаться
-                    </button>
-                )}
-
-                {gameOver && (
-                    <button
-                        onClick={() => navigate('/')}
-                        className="w-full py-2 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium transition"
-                    >
-                        В лобби
-                    </button>
-                )}
-            </div>
+                {/* Actions */}
+                <div className="w-full max-w-lg">
+                    {!gameOver ? (
+                        <button
+                            onClick={handleResign}
+                            className="w-full py-3 rounded-2xl font-medium text-white transition hover:opacity-90 active:scale-95"
+                            style={{ background: '#c44' }}
+                        >
+                            🏳️ Сдаться
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full py-3 rounded-2xl font-medium text-white transition hover:opacity-90 active:scale-95"
+                            style={{ background: '#4d9e4d' }}
+                        >
+                            В лобби
+                        </button>
+                    )}
+                </div>
+            </main>
         </div>
     )
 }

@@ -1,9 +1,10 @@
 package ws
 
 import (
-	"github.com/gorilla/websocket"
 	"log/slog"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -34,6 +35,8 @@ func (c *Client) ReadPump() {
 	defer func() {
 		c.room.Leave(c)
 		c.conn.Close()
+
+		c.room.Broadcast([]byte(`{"type":"opponent_disconnected"}`), c)
 	}()
 
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
