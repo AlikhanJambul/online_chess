@@ -62,6 +62,11 @@ func (s *gameService) FinishGame(ctx context.Context, gameID string, winnerID st
 		return fmt.Errorf("game not found: %w", err)
 	}
 
+	if game.BlackID == nil || *game.BlackID == "" {
+		// игра с ботом — просто финишируем без обновления статистики
+		return s.repo.FinishGame(ctx, gameID, winnerID)
+	}
+
 	// определяем loserID
 	loserID := game.WhiteID
 	if game.WhiteID == winnerID {

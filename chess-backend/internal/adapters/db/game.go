@@ -3,6 +3,7 @@ package db
 import (
 	"chess-backend/internal/domain/models"
 	"context"
+	"database/sql"
 	"time"
 )
 
@@ -55,12 +56,18 @@ func (r *repository) GetGameByID(ctx context.Context, id string) (*models.Game, 
 
 func (r *repository) FinishGame(ctx context.Context, gameID string, winnerID string) error {
 	now := time.Now()
+
+	var winner sql.NullString
+	if winnerID != "" {
+		winner = sql.NullString{String: winnerID, Valid: true}
+	}
+
 	query := `
 		UPDATE games 
 		SET status = 'finished', winner_id = $1, finished_at = $2 
 		WHERE id = $3`
 
-	_, err := r.db.ExecContext(ctx, query, winnerID, now, gameID)
+	_, err := r.db.ExecContext(ctx, query, winner, now, gameID)
 	return err
 }
 

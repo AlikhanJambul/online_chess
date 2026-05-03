@@ -176,7 +176,13 @@ export default function Game() {
         if (mode !== 'bot') {
             sendMessage({ type: 'resign' })
         }
-        await api.post(`/games/${id}/finish`, { winner_id: null })
+
+        const gameData = await api.get(`/games/${id}`)
+        const winnerId = gameData.data.white_id === user?.uid 
+        ? gameData.data.black_id 
+        : gameData.data.white_id
+
+        await api.post(`/games/${id}/finish`, { winner_id: winnerId })
         setGameOver(true)
         setStatus('Вы сдались')
     }
