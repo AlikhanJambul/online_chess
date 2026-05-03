@@ -130,15 +130,31 @@ func (r *repository) JoinGame(ctx context.Context, gameID string, blackID string
 	return err
 }
 
-func (r *repository) GetLeaderboard(ctx context.Context) ([]*models.LeaderboardEntry, error) {
-	query := `
-		SELECT id, name, avatar_url, wins, losses,
-		RANK() OVER (ORDER BY wins DESC) as rank
-		FROM users
-		ORDER BY wins DESC
-		LIMIT 100`
+func (r *repository) GetLeaderboard(ctx context.Context, league string) ([]*models.LeaderboardEntry, error) {
+	var minWins, maxWins int
 
-	rows, err := r.db.QueryContext(ctx, query)
+	switch league {
+	case "bronze":
+		minWins, maxWins = 0, 99
+	case "silver":
+		minWins, maxWins = 100, 499
+	case "gold":
+		minWins, maxWins = 500, 999
+	case "diamond":
+		minWins, maxWins = 1000, 999999
+	default:
+		minWins, maxWins = 0, 99
+	}
+
+	query := `
+        SELECT id, name, avatar_url, wins, losses,
+        RANK() OVER (ORDER BY wins DESC) as rank
+        FROM users
+        WHERE wins >= $1 AND wins <= $2
+        ORDER BY wins DESC
+        LIMIT 100`
+
+	rows, err := r.db.QueryContext(ctx, query, minWins, maxWins)
 	if err != nil {
 		return nil, err
 	}

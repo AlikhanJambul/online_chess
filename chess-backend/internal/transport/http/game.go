@@ -103,10 +103,10 @@ func (h *Handler) GetUserGames(c *gin.Context) {
 }
 
 func (h *Handler) GetLeaderboard(c *gin.Context) {
-	entries, err := h.gameService.GetLeaderboard(c.Request.Context())
-	if err != nil {
-		slog.Error(err.Error())
+	league := c.DefaultQuery("league", "bronze")
 
+	entries, err := h.gameService.GetLeaderboard(c.Request.Context(), league)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

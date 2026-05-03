@@ -19,5 +19,5 @@ type Repository interface {
 	GetUserGames(ctx context.Context, userID string) ([]*models.Game, error)
 	UpdateStats(ctx context.Context, winnerID string, loserID string) error
 	JoinGame(ctx context.Context, gameID string, blackID string) error
-	GetLeaderboard(ctx context.Context) ([]*models.LeaderboardEntry, error)
+	GetLeaderboard(ctx context.Context, league string) ([]*models.LeaderboardEntry, error)
 }

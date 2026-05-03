@@ -13,7 +13,7 @@ type GameService interface {
 	FinishGame(ctx context.Context, gameID string, winnerID string) error
 	GetGame(ctx context.Context, gameID string) (*models.Game, error)
 	GetUserGames(ctx context.Context, userID string) ([]*models.Game, error)
-	GetLeaderboard(ctx context.Context) ([]*models.LeaderboardEntry, error)
+	GetLeaderboard(ctx context.Context, league string) ([]*models.LeaderboardEntry, error)
 }
 
 type gameService struct {
@@ -92,6 +92,6 @@ func (s *gameService) GetUserGames(ctx context.Context, userID string) ([]*model
 	return s.repo.GetUserGames(ctx, userID)
 }
 
-func (s *gameService) GetLeaderboard(ctx context.Context) ([]*models.LeaderboardEntry, error) {
-	return s.repo.GetLeaderboard(ctx)
+func (s *gameService) GetLeaderboard(ctx context.Context, league string) ([]*models.LeaderboardEntry, error) {
+	return s.repo.GetLeaderboard(ctx, league)
 }

@@ -267,7 +267,7 @@ export default function Game() {
 
                 {/* Actions */}
                 <div className="w-full max-w-lg">
-                    {!gameOver ? (
+                    {!gameOver && gameStarted && (
                         <button
                             onClick={handleResign}
                             className="w-full py-3 rounded-2xl font-medium text-white transition hover:opacity-90 active:scale-95"
@@ -275,7 +275,8 @@ export default function Game() {
                         >
                             🏳️ Сдаться
                         </button>
-                    ) : (
+                    )}
+                    {gameOver && (
                         <button
                             onClick={() => navigate('/')}
                             className="w-full py-3 rounded-2xl font-medium text-white transition hover:opacity-90 active:scale-95"

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useThemeStore } from '../store/themeStore'
+import LeagueIcon from '../components/LeagueIcon'
 import api from '../api/axios'
 
 interface Game {
@@ -11,6 +12,20 @@ interface Game {
     winner_id: string | null
     status: string
     created_at: string
+}
+
+const getLeague = (wins: number) => {
+    if (wins >= 1000) return { id: 'diamond' as const, label: 'Алмаз', color: '#4fc3f7' }
+    if (wins >= 500) return { id: 'gold' as const, label: 'Золото', color: '#ffd700' }
+    if (wins >= 100) return { id: 'silver' as const, label: 'Серебро', color: '#a8a8a8' }
+    return { id: 'bronze' as const, label: 'Бронза', color: '#cd7f32' }
+}
+
+const getNextLeague = (wins: number) => {
+    if (wins >= 1000) return null
+    if (wins >= 500) return { label: 'Алмаз', needed: 1000 }
+    if (wins >= 100) return { label: 'Золото', needed: 500 }
+    return { label: 'Серебро', needed: 100 }
 }
 
 export default function Profile() {
@@ -29,6 +44,8 @@ export default function Profile() {
 
     const wins = games.filter(g => g.winner_id === user?.uid).length
     const losses = games.filter(g => g.status === 'finished' && g.winner_id && g.winner_id !== user?.uid).length
+    const league = getLeague(wins)
+    const nextLeague = getNextLeague(wins)
 
     const getResult = (game: Game) => {
         if (game.status !== 'finished') return { label: 'В процессе', color: 'var(--text2)', bg: 'var(--bg2)' }
@@ -40,7 +57,8 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
-            <header className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
+            <header className="flex items-center justify-between px-6 py-4 border-b"
+                style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/')}
@@ -49,7 +67,7 @@ export default function Profile() {
                     >
                         ←
                     </button>
-                    <h1 className="font-bold text-lg" style={{ color: 'var(--text)' }}>👤 Профиль</h1>
+                    <h1 className="font-bold text-lg" style={{ color: 'var(--text)' }}>Профиль</h1>
                 </div>
                 <button
                     onClick={toggle}
@@ -66,7 +84,8 @@ export default function Profile() {
                     style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
                     {user?.photoURL
                         ? <img src={user.photoURL} className="w-16 h-16 rounded-2xl flex-shrink-0" />
-                        : <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{ background: 'var(--bg2)' }}>👤</div>
+                        : <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+                            style={{ background: 'var(--bg2)' }}>👤</div>
                     }
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-xl truncate" style={{ color: 'var(--text)' }}>{user?.displayName}</p>
@@ -85,6 +104,38 @@ export default function Profile() {
                         style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
                         <p className="text-3xl font-bold" style={{ color: '#c44' }}>{losses}</p>
                         <p className="text-sm mt-1" style={{ color: 'var(--text2)' }}>Поражения</p>
+                    </div>
+                </div>
+
+                {/* League */}
+                <div className="rounded-2xl p-4 flex items-center gap-4 shadow-sm"
+                    style={{ background: 'var(--card)', border: `1px solid ${league.color}` }}>
+                    <LeagueIcon league={league.id} size={48} />
+                    <div className="flex-1">
+                        <p className="font-semibold text-lg" style={{ color: league.color }}>
+                            {league.label} лига
+                        </p>
+                        {nextLeague ? (
+                            <>
+                                <p className="text-xs mt-1" style={{ color: 'var(--text2)' }}>
+                                    {wins} / {nextLeague.needed} побед до {nextLeague.label}
+                                </p>
+                                <div className="mt-2 h-1.5 rounded-full overflow-hidden"
+                                    style={{ background: 'var(--bg2)' }}>
+                                    <div
+                                        className="h-full rounded-full transition-all"
+                                        style={{
+                                            width: `${Math.min((wins / nextLeague.needed) * 100, 100)}%`,
+                                            background: league.color
+                                        }}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-xs mt-1" style={{ color: 'var(--text2)' }}>
+                                Максимальная лига! 🎉
+                            </p>
+                        )}
                     </div>
                 </div>
 
