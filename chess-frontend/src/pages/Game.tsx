@@ -101,8 +101,14 @@ export default function Game() {
         } else if (msg.type === 'resign') {
             setStatus('Соперник сдался! 🏳️')
             setGameOver(true)
+        } else if (msg.type === 'opponent_disconnected') {
+            setStatus('Соперник отключился! 🏳️')
+            setGameOver(true)
+            if (mode !== 'bot') {
+                api.post(`/games/${id}/finish`, { winner_id: user?.uid })
+            }
         }
-    }, [handleGameOver])
+    }, [handleGameOver, mode, id, user])
 
     const handleWSOpen = useCallback(() => {
         if (mode === 'join') {

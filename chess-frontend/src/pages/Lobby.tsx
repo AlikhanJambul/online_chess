@@ -45,7 +45,7 @@ export default function Lobby() {
             </header>
 
             {/* Main */}
-            <main className="flex-1 flex flex-col lg:flex-row gap-6 p-4 sm:p-8 max-w-5xl mx-auto w-full">
+            <main className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-8 p-4 sm:p-8 max-w-5xl mx-auto w-full">
                 {/* Left - Welcome */}
                 <div className="flex-1 flex flex-col justify-center gap-6">
                     <div>
