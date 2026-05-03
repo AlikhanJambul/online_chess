@@ -6,12 +6,6 @@
       "headers": [
         { "key": "Content-Type", "value": "application/wasm" }
       ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" }
-      ]
     }
   ]
 }

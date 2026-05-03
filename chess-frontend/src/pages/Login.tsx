@@ -1,17 +1,12 @@
-import { signInWithRedirect, getRedirectResult } from 'firebase/auth'
-import { useEffect } from 'react'
+import { signInWithPopup } from 'firebase/auth'
 import { auth, googleProvider } from '../firebase'
 import { useThemeStore } from '../store/themeStore'
 
 export default function Login() {
     const { isDark, toggle } = useThemeStore()
 
-    useEffect(() => {
-        getRedirectResult(auth).catch(() => {})
-    }, [])
-
     const handleLogin = async () => {
-        await signInWithRedirect(auth, googleProvider)
+        await signInWithPopup(auth, googleProvider)
     }
 
     return (
