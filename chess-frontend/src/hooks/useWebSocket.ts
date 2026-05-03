@@ -17,7 +17,8 @@ export const useWebSocket = (
             if (!user) return
 
             const token = await user.getIdToken()
-            ws = new WebSocket(`ws://localhost:8080/ws/games/${gameId}?token=${token}`)
+            const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8080'
+            ws = new WebSocket(`${wsUrl}/ws/games/${gameId}?token=${token}`)
 
             ws.onopen = () => {
                 console.log('ws connected')
