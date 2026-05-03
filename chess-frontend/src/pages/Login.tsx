@@ -1,12 +1,17 @@
-import { signInWithPopup } from 'firebase/auth'
+import { signInWithRedirect, getRedirectResult } from 'firebase/auth'
+import { useEffect } from 'react'
 import { auth, googleProvider } from '../firebase'
 import { useThemeStore } from '../store/themeStore'
 
 export default function Login() {
     const { isDark, toggle } = useThemeStore()
 
+    useEffect(() => {
+        getRedirectResult(auth).catch(() => {})
+    }, [])
+
     const handleLogin = async () => {
-        await signInWithPopup(auth, googleProvider)
+        await signInWithRedirect(auth, googleProvider)
     }
 
     return (
@@ -20,7 +25,6 @@ export default function Login() {
             </button>
 
             <div className="w-full max-w-sm flex flex-col items-center gap-8">
-                {/* Logo */}
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-5xl shadow-lg"
                         style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
@@ -32,7 +36,6 @@ export default function Login() {
                     </div>
                 </div>
 
-                {/* Mini board preview */}
                 <div className="grid grid-cols-8 gap-0 w-40 h-40 rounded-2xl overflow-hidden shadow-xl">
                     {Array.from({ length: 64 }).map((_, i) => {
                         const row = Math.floor(i / 8)
@@ -44,7 +47,6 @@ export default function Login() {
                     })}
                 </div>
 
-                {/* Card */}
                 <div className="w-full rounded-3xl p-6 flex flex-col gap-4 shadow-xl"
                     style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
                     <div className="text-center">
