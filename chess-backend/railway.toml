@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "./main"
+
+[build.buildCommand]
+cmd = "go build -o main ./cmd/main.go"
