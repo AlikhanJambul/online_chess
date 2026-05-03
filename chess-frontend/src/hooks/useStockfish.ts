@@ -5,10 +5,9 @@ export const useStockfish = (onBestMove: (move: string) => void) => {
 
     useEffect(() => {
         const worker = new Worker(
-            new URL('stockfish/src/stockfish-nnue-16-single.js', import.meta.url),
+            new URL('stockfish/src/stockfish-nnue-16-no-simd.js', import.meta.url),
             { type: 'classic' }
         )
-
         worker.onmessage = (e: MessageEvent) => {
             const message = e.data as string
             if (message.startsWith('bestmove')) {
